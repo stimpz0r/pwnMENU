@@ -1,5 +1,5 @@
 # pwnMENU
-## by stimpz0r (2022)
+### >> by stimpz0r (2022)
 
 A [rofi](https://github.com/davatorium/rofi) menu created for pentesters to help streamline and automate the tasks required to pentest a target.
 
@@ -15,7 +15,7 @@ Here is a screenshot of the main menu:
 
 ![pwnMENU main screen](screenshot.png)
 
-### Features
+## Features
 
 - Added the **"SHELLS"** menu
 	- Get the command to start a *netcat* listener based on the target port settings
@@ -41,7 +41,7 @@ Here is a screenshot of the main menu:
 	- You can also set a "default" IP & port to use as your attack machine details, which can also simply point to a network interface that **pwnMENU** will automatically look up and set accordingly
 	- **pwnMENU** will allow you to set your target details in the menu that are exported to a temporary file (named `target.cfg`) that will automatically use those details each time **pwnMENU** is started, so you do not need to set it each time.
 
-### Requirements
+## Requirements
 
 - **pwnMENU** requires the following installed on the attack box:
 	- [rofi](https://github.com/davatorium/rofi)
@@ -62,20 +62,20 @@ Here is a screenshot of the main menu:
 		- *MSFVenom*
 		- *searchsploit*
 
-### Installation
+## Installation
 
-Once you have installed all the requirements, to install **pwnMENU**simply clone the repo to your home directory (or wherever you wish), and edit `pwn_menu.sh` - change any of the settings dependant on your setup / requirements and save the file. 
+Once you have installed all the requirements, to install **pwnMENU** simply clone the repo to your home directory (or wherever you wish), and edit `pwn_menu.sh` - change any of the settings dependant on your setup / requirements and save the file. 
 
 To launch **pwnMENU**, i strongly suggest adding a keyboard shortcut via your window manager. Bind it to a key that is not being used and is easy to reach (I personally use `ctrl-x`).
 
 **pwnMENU** has been tested on both a [BlackArch]([https://blackarch.org/](https://blackarch.org/)) and [Parrot OS](https://parrotsec.org) setup, but it should work fine with [Kali](https://kali.org) as well.
 
-### To-do in the future...
+## To-do in the future...
 
-[-] Add support for *CrackMapExec*, *gobuster*, and any other tools that can help with recon / enumeration
-[-] Complete the **"BRUTE"** menu, including adding *John*, *Hashcat* and *Hydra* support
-[-] Add support for *Active Directory* related tools (such as *Impacket*, *Rubeus*, and other tools / methods for enumerating and exploiting AD) 
-[-] ... ? 
+- [ ] Add support for *CrackMapExec*, *gobuster*, and any other tools that can help with recon / enumeration
+- [ ] Complete the **"BRUTE"** menu, including adding *John*, *Hashcat* and *Hydra* support
+- [ ] Add support for *Active Directory* related tools (such as *Impacket*, *Rubeus*, and other tools / methods for enumerating and exploiting AD) 
+- [ ] ... ? 
 
 Feel free to suggest any features you wish to be implemented in pwnMENU via the Issues tab, and I will do my best to implement them when time permits.
 
