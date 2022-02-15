@@ -153,10 +153,12 @@ recon_nmap()
                 esac
                 ;;
             "SCRIPT")
-                menu="N/A\n$(find /usr/share/nmap/scripts/ -name '*.nse' | sed 's|/usr/share/nmap/scripts/||')"
+                menu="$(pfx "N/A") don't execute any scripts\n$(pfx "-sC") execute default scripts\n$lbrk\n$(find /usr/share/nmap/scripts/ -name '*.nse' | sed 's|/usr/share/nmap/scripts/||')"
                 result=$(echo -e "$menu" | rf "SCRIPT")
-                if [ "$result" == "N/A" ]; then
+                if [ "$(echo $result | awk '{print $1}')" == "N/A" ] || [ "$result" == "$lbrk" ]; then
                     nmap_script=""
+                elif [ "$(echo $result | awk '{print $1}')" == "-sC" ]; then
+                    nmap_script="-sC"
                 else
                     nmap_script="--script $result"
                 fi
