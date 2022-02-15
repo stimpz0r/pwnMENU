@@ -235,7 +235,7 @@ main()
 
 menu_target()
 {
-	menu="$(pfx -n "IP") $new_target_ip\n<small>(current = $target_ip) change the target IP address</small>$lb$(pfx -n "OS") $new_target_os\n<small>(current = $target_os) change the target OS</small>$lb$(pfx -n "ARCH") $new_target_arch\n<small>(current = $target_arch) change the target OS architecture</small>$lb$lbrk$lb$(pfx -n "SET") $target_ip | $target_os | $target_arch\n<small>save the above changes</small>$lb$(pfx -n "RESET") reset target\n<small>removes the target configuration</small>$lb$(pfx -n "COPYIP") $target_ip \n<small>copies the target IP to the clipboard</small>"
+	menu="$(pfx -n "IP") $new_target_ip\n<small>(current = $target_ip) change the target IP address</small>$lb$(pfx -n "OS") $new_target_os\n<small>(current = $target_os) change the target OS</small>$lb$(pfx -n "ARCH") $new_target_arch\n<small>(current = $target_arch) change the target OS architecture</small>$lb$lbrk$lb$(pfx -n "SET") $target_ip | $target_os | $target_arch\n<small>save the above changes</small>$lb$(pfx -n "RESET") reset target\n<small>removes the target configuration</small>$lb$(pfx -n "COPYIP") $target_ip \n<small>copies the target IP to the clipboard</small>$lb$(pfx -n "BACK") go back..."
 	msg="pwnMENU > <b>TARGET</b>\n<small>select from the following options:</small>"
 	result=$(echo -ne "$menu" | rf "TARGET" "$msg" 11)
     result=$(echo $result | awk '{print $1}')
@@ -281,7 +281,7 @@ menu_target()
             echo -e "$target_ip $target_os $target_arch" > $target_cfg_file
             target_set_defaults
             rf_msg "$(pfx -n "INFO") target configuration has been saved."
-            menu_target
+            main
 			;;
 		"RESET")
             if [ -f "$target_cfg_file" ]; then
@@ -296,6 +296,9 @@ menu_target()
             echo -ne $target_ip | xclip -sel clip
             rf_msg "$(pfx -n "INFO") target IP '$target_ip' copied to the clipboard."
             exit 0
+            ;;
+        "BACK")
+            main
             ;;
     esac
 }
