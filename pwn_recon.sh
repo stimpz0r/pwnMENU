@@ -12,6 +12,20 @@ nmap_osver=""
 nmap_output=""
 nmap_verbose=""
 
+gobuster_fileext=""
+gobuster_domain=""
+gobuster_resolver=""
+gobuster_output=""
+gobuster_username=""
+gobuster_password=""
+gobuster_notls=""
+gobuster_cookies=""
+gobuster_headers=""
+gobuster_threads=""
+gobuster_useragent=""
+gobuster_verbose=""
+gobuster_statcode=""
+
 ferox_output=""
 ferox_recurse=""
 ferox_statcode=""
@@ -242,11 +256,14 @@ recon_http()
         menu_recon
         break
     else
-        menu="$(pfx -n "FEROX") FeroxBuster directory / file scan\n<small>crawls website files and directories using wordlists</small>$lb$(pfx -n "NIKTO") Nikto scan\n<small>checks target webserver for known misconfigurations that can lead to exploitation</small>$lb$(pfx -n "CMSEEK") CMSeeK scan\n<small>checks website address for known CMS and tries to gather information about the CMS setup</small>$lb$(pfx -n "WPSCAN") wp-scan - wordpress scanner\n<small>scans wordpress sites for known misconfigurations and credentials</small>$lb$(pfx -n "SQLMAP") SQLmap\n<small>test url for SQL injection methods</small>$lb$lbrk$lb$(pfx -n "BACK") go back..."
+        menu="$(pfx -n "GOBUSTER") GoBuster web scan\n<small>crawls website files, directories, vhosts and dns subdomains using wordlists</small>$lb$(pfx -n "FEROX") FeroxBuster directory / file scan\n<small>crawls website files and directories using wordlists</small>$lb$(pfx -n "NIKTO") Nikto scan\n<small>checks target webserver for known misconfigurations that can lead to exploitation</small>$lb$(pfx -n "CMSEEK") CMSeeK scan\n<small>checks website address for known CMS and tries to gather information about the CMS setup</small>$lb$(pfx -n "WPSCAN") wp-scan - wordpress scanner\n<small>scans wordpress sites for known misconfigurations and credentials</small>$lb$(pfx -n "SQLMAP") SQLmap\n<small>test url for SQL injection methods</small>$lb$lbrk$lb$(pfx -n "BACK") go back..."
         msg="pwnMENU > RECON > <b>HTTP</b>\n<small>website-related scanners to help you enumerate websites</small>"
-        result=$(echo -e "$menu" | rf "FEROX" "$msg" 7)
+        result=$(echo -e "$menu" | rf "FEROX" "$msg" 8)
         result=$(echo $result | awk '{print $1}')
         case $result in
+            "GOBUSTER")
+                recon_gobuster
+                ;;
             "FEROX")
                 recon_ferox
                 ;;
@@ -267,6 +284,394 @@ recon_http()
                 ;;
         esac
     fi
+}
+
+recon_gobuster()
+{
+    app="gobuster"
+    if [ "$(app_exists $app)" == "" ]; then
+        rf_msg "$(pfx -n "ERROR") $app does not exist on your system. please install to use this feature."
+        menu_recon
+        break
+    fi
+    if [ "$gobuster_mode" == "" ]; then
+        gobuster_mode="dir"
+    fi
+    if [ "$gobuster_url" == "" ]; then
+        gobuster_url="http://$target_ip/"
+    fi
+    if [ "$gobuster_wordlist" == "" ]; then
+        gobuster_wordlist="$def_http_wordlist"
+    fi
+    msg="pwnMENU > RECON > HTTP > <b>GOBUSTER</b>\n<small>GoBuster crawls websites searching for files, directories, vhosts and DNS subdomains based off supplied wordlist</small>"
+    if [ "$gobuster_mode" == "dir" ]; then
+        menu="$(pfx "MODE") $gobuster_mode\nscan mode to use with GoBuster$lb$(pfx "URL") $gobuster_url\nURL to scan with GoBuster$lb$(pfx "WORDLIST") $gobuster_wordlist\nwordlist to use for scan$lb$(pfx "FILEEXT") $gobuster_fileext\n(optional) search for given list of file extensions$lb$(pfx "OUTPUT") $gobuster_output\n(optional) output results to file (default = none)$lb$(pfx "STATCODE") $gobuster_statcode\n(optional) HTTP status codes to allow as positive result$lb$(pfx "USERAGNT") $gobuster_useragent\n(optional) customize user-agent to send with request$lb$(pfx "COOKIES") $gobuster_cookies\n(optional) cookies to send with the request$lb$(pfx "HEADERS") $gobuster_headers\n(optional) headers to send with the request$lb$(pfx "NOTLS") $gobuster_notls\n(optional) disable TLS/SSL certificate verification$lb$(pfx "USERNAME") $gobuster_username\n(optional) username for HTTP basic auth login$lb$(pfx "PASSWORD") $gobuster_password\n(optional) password for HTTP basic auth$lb$(pfx "THREADS") $gobuster_threads\n(optional) amount of threads to use$lb$(pfx "VERBOSE") $gobuster_verbose\n(optional) change verbosity of output$lb$lbrk$lb$(pfx "GEN") generate GoBuster command$lb$(pfx "BACK") go back..."
+        result=$(echo -e "$menu" | rf "MODE" "$msg" 17)
+    elif [ "$gobuster_mode" == "vhost" ]; then
+        menu="$(pfx "MODE") $gobuster_mode\nscan mode to use with GoBuster$lb$(pfx "URL") $gobuster_url\nURL to scan with GoBuster$lb$(pfx "WORDLIST") $gobuster_wordlist\nwordlist to use for scan$lb$(pfx "OUTPUT") $gobuster_output\n(optional) output results to file (default = none)$lb$(pfx "USERAGNT") $gobuster_useragent\n(optional) customize user-agent to send with request$lb$(pfx "COOKIES") $gobuster_cookies\n(optional) cookies to send with the request$lb$(pfx "HEADERS") $gobuster_headers\n(optional) headers to send with the request$lb$(pfx "NOTLS") $gobuster_notls\n(optional) disable TLS/SSL certificate verification$lb$(pfx "USERNAME") $gobuster_username\n(optional) username for HTTP basic auth login$lb$(pfx "PASSWORD") $gobuster_password\n(optional) password for HTTP basic auth$lb$(pfx "THREADS") $gobuster_threads\n(optional) amount of threads to use$lb$(pfx "VERBOSE") $gobuster_verbose\n(optional) change verbosity of output$lb$lbrk$lb$(pfx "GEN") generate GoBuster command$lb$(pfx "BACK") go back..."
+        result=$(echo -e "$menu" | rf "MODE" "$msg" 15)
+    elif [ "$gobuster_mode" == "dns" ]; then
+        menu="$(pfx "MODE") $gobuster_mode\nscan mode to use with GoBuster$lb$(pfx "DOMAIN") $gobuster_domain\ndomain to scan with GoBuster$lb$(pfx "RESOLVER") $gobuster_resolver\nDNS server (resolver) to use with scan$lb$(pfx "WORDLIST") $gobuster_wordlist\nwordlist to use for scan$lb$(pfx "OUTPUT") $gobuster_output\n(optional) output results to file (default = none)$lb$(pfx "THREADS") $gobuster_threads\n(optional) amount of threads to use$lb$(pfx "VERBOSE") $gobuster_verbose\n(optional) change verbosity of output$lb$lbrk$lb$(pfx "GEN") generate GoBuster command$lb$(pfx "BACK") go back..."
+        result=$(echo -e "$menu" | rf "MODE" "$msg" 10)
+    fi
+    result=$(echo $result | awk '{print $1}')
+    case $result in
+        "MODE")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>MODE</b>\n<small>GoBuster scanning mode</small>"
+            menu="$(pfx "DIR") directory / file scanning$lb$(pfx "VHOST") vhost scanning$lb$(pfx "DNS") DNS subdomain scanning"
+            result=$(echo -e "$menu" | rf "MODE" "$msg" 3)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "DIR")
+                    gobuster_mode="dir"
+                    recon_gobuster
+                    ;;
+                "VHOST")
+                    gobuster_mode="vhost"
+                    recon_gobuster
+                    ;;
+                "DNS")
+                    gobuster_mode="dns"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "DOMAIN")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>DOMAIN</b>\n<small>enter or select the domain to be scanned with GoBuster</small>"
+            target_domain="$(nslookup $target_ip | grep "name = " | awk '{print $4}' | head -c -2)"
+            if [ "$target_domain" == "" ]; then
+                result=$(echo -e '' | rf "DOMAIN" "$msg" 0)
+            else
+                urls="$(pfx "TARGET") $target_domain"
+                result=$(echo -e "$urls" | rf "DOMAIN" "$msg" 1)
+            fi
+            if [ "$(echo $result | awk '{print $2}')" == "❯❯" ]; then
+                gobuster_domain="$(echo $result | awk '{print $3}')"
+            else
+                gobuster_domain="$(echo $result | awk '{print $1}')"
+            fi
+            recon_gobuster
+            ;;
+        "RESOLVER")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>RESOLVER</b>\n<small>(optional) set file extensions to search for</small>"
+            menu="$(pfx "N/A") use system-configured DNS resolver$lb$(pfx "-r") domain/ip address of DNS resolver"
+            result=$(echo -e "$menu" | rf "RESOLVER" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_resolver=""
+                    recon_gobuster
+                    ;;
+                "-r")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > RESOLVER > <b>-r</b>\n<small>enter the DNS server domain/ip to use as a DNS resolver</small>"
+                    result=$(echo '' | rf "RESOLVER" "$msg" 0)
+                    gobuster_resolver="-r $result"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "URL")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>URL</b>\n<small>enter or select the URL to be scanned with GoBuster</small>"
+            urls="$(pfx "TARGET") http://$target_ip/"
+            result=$(echo -e "$urls" | rf "URL" "$msg" 1)
+            if [ "$(echo $result | awk '{print $2}')" == "❯❯" ]; then
+                gobuster_url="$(echo $result | awk '{print $3}')"
+            else
+                gobuster_url="$(echo $result | awk '{print $1}')"
+            fi
+            recon_gobuster
+            ;;
+        "WORDLIST")
+            gobuster_wordlist
+            ;;
+        "FILEEXT")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>FILEEXT</b>\n<small>(optional) set file extensions to search for</small>"
+            menu="$(pfx "N/A") no file extensions$lb$(pfx "-x") enter comma seperated list of extensions"
+            result=$(echo -e "$menu" | rf "FILEEXT" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_fileext=""
+                    recon_gobuster
+                    ;;
+                "-x")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > FILEEXT > <b>-x</b>\n<small>enter the list of file extensions (seperated by no spaces and a comma) to scan for</small>"
+                    result=$(echo '' | rf "-x" "$msg" 0)
+                    gobuster_fileext="-x $result"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "OUTPUT")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>OUTPUT</b>\n<small>(optional) output GoBuster scan details to a file (default = none)</small>"
+            menu="$(pfx "N/A") do not output to a file$lb$(pfx "-o") output to a file"
+            result=$(echo -e "$menu" | rf "OUTPUT" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_output=""
+                    recon_gobuster
+                    ;;
+                "-o")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > OUTPUT > <b>-o</b>\n<small>enter the filename for output</small>"
+                    filename=$(echo '' | rf "-o" "$msg" 0)
+                    gobuster_output="-o $filename"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "STATCODE")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>STATCODE</b>\n<small>(optional) HTTP status codes to allow or ignore (blacklist)</small>"
+            menu="$(pfx "N/A") allow default status codes$lb$(pfx "-s") allow custom status code list$lb$(pfx "-b") ignore custom status code list (blacklist)"
+            result=$(echo -e "$menu" | rf "STATCODE" "$msg" 3)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_statcode=""
+                    recon_gobuster
+                    ;;
+                "-s")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > OUTPUT > <b>-s</b>\n<small>enter status codes (seperated by space) that you wish to allow</small>"
+                    codes=$(echo '' | rf "-s" "$msg" 0)
+                    gobuster_statcode="-s $codes"
+                    recon_gobuster
+                    ;;
+                "-b")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > OUTPUT > <b>-b</b>\n<small>enter status codes (seperated by space) that you wish to ignore</small>"
+                    codes=$(echo '' | rf "-b" "$msg" 0)
+                    gobuster_statcode="-b $codes"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "USERAGNT")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>USERAGNT</b>\n<small>(optional) set the User-Agent property sent with each request (default = gobuster/VERSION)</small>"
+            menu="$(pfx "N/A") use default user-agent$lb$(pfx "-a") set custom user-agent$lb$(pfx "--random-agent") set random user-agent"
+            result=$(echo -e "$menu" | rf "USERAGNT" "$msg" 3)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_useragent=""
+                    recon_gobuster
+                    ;;
+                "--random-agent")
+                    gobuster_useragent=""
+                    recon_gobuster
+                    ;;
+                "-a")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > USERAGNT > <b>-a</b>\n<small>enter custom user-agent to use</small>"
+                    useragent=$(echo '' | rf "-a" "$msg" 0)
+                    gobuster_useragent="-a '$useragent'"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "COOKIES")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>COOKIES</b>\n<small>(optional) set cookies to use for HTTP request</small>"
+            menu="$(pfx "N/A") no cookies$lb$(pfx "-c") enter cookies to use for HTTP request"
+            result=$(echo -e "$menu" | rf "COOKIES" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_cookies=""
+                    recon_gobuster
+                    ;;
+                "-c")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > COOKIES > <b>-c</b>\n<small>enter the cookies to use for HTTP request</small>"
+                    result=$(echo '' | rf "-c" "$msg" 0)
+                    gobuster_cookies="-c '$result'"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "HEADERS")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>HEADERS</b>\n<small>(optional) set headers to use for HTTP request</small>"
+            menu="$(pfx "N/A") no headers$lb$(pfx "-H") enter headers to use for HTTP request"
+            result=$(echo -e "$menu" | rf "HEADERS" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_headers=""
+                    recon_gobuster
+                    ;;
+                "-H")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > HEADERS > <b>-H</b>\n<small>enter the headers to use for HTTP request</small>"
+                    result=$(echo '' | rf "-H" "$msg" 0)
+                    gobuster_headers="-H '$result'"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "NOTLS")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>NOTLS</b>\n<small>(optional) diable TLS certificate verification</small>"
+            menu="$(pfx "N/A") no change$lb$(pfx "-k") diable TLS certificate verification"
+            result=$(echo -e "$menu" | rf "NOTLS" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_notls=""
+                    recon_gobuster
+                    ;;
+                "-k")
+                    gobuster_notls="-k"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "USERNAME")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>USERNAME</b>\n<small>(optional) set username to use for HTTP basic authorization</small>"
+            menu="$(pfx "N/A") no username$lb$(pfx "-U") enter username to use for HTTP basic auth"
+            result=$(echo -e "$menu" | rf "USERNAME" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_username=""
+                    recon_gobuster
+                    ;;
+                "-U")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > USERNAME > <b>-U</b>\n<small>enter the username to use for HTTP basic auth</small>"
+                    result=$(echo '' | rf "-U" "$msg" 0)
+                    gobuster_username="-U $result"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "PASSWORD")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>PASSWORD</b>\n<small>(optional) set password to use for HTTP basic authorization</small>"
+            menu="$(pfx "N/A") no password$lb$(pfx "-P") enter password to use for HTTP basic auth"
+            result=$(echo -e "$menu" | rf "PASSWORD" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_password=""
+                    recon_gobuster
+                    ;;
+                "-P")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > PASSWORD > <b>-P</b>\n<small>enter the password to use for HTTP basic auth</small>"
+                    result=$(echo '' | rf "-P" "$msg" 0)
+                    gobuster_password="-P $result"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "THREADS")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>THREADS</b>\n<small>(optional) select how many threads to use (default = 10)</small>"
+            menu="$(pfx "N/A") use default amount of threads$lb$(pfx "-t") set custom amount of threads"
+            result=$(echo -e "$menu" | rf "THREADS" "$msg" 2)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_threads=""
+                    recon_gobuster
+                    ;;
+                "-t")
+                    msg="pwnMENU > RECON > HTTP > GOBUSTER > THREADS > <b>-t</b>\n<small>enter custom amount of threads to use</small>"
+                    threads=$(echo '' | rf "-t" "$msg" 0)
+                    gobuster_threads="-t $threads"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "VERBOSE")
+            msg="pwnMENU > RECON > HTTP > GOBUSTER > <b>VERBOSE</b>\n<small>(optional) set the verbosity of GoBuster output</small>"
+            menu="$(pfx "N/A") no verbosity$lb$(pfx "-v") enable verbosity$lb$(pfx "-q") enable quiet mode$lb$(pfx "-z") disable progress"
+            result=$(echo -e "$menu" | rf "VERBOSE" "$msg" 4)
+            result=$(echo $result | awk '{print $1}')
+            case $result in
+                "N/A")
+                    gobuster_verbose=""
+                    recon_gobuster
+                    ;;
+                "-v")
+                    gobuster_verbose="-v"
+                    recon_gobuster
+                    ;;
+                "-q")
+                    gobuster_verbose="-q"
+                    recon_gobuster
+                    ;;
+                "-z")
+                    gobuster_verbose="-z"
+                    recon_gobuster
+                    ;;
+            esac
+            ;;
+        "GEN")
+            if [ "$gobuster_mode" == "dns" ] && [ "$gobuster_domain" == "" ]; then
+                rf_msg "$(pfx -n "ERROR") you have not set the necessary settings - please ensure you set at least a domain to scan and wordlist"
+                recon_gobuster
+            elif [ "$gobuster_mode" != "dns" ] && [ "$gobuster_url" == "" ]; then
+                rf_msg "$(pfx -n "ERROR") you have not set the necessary settings - please ensure you set at least a URL to scan and wordlist"
+                recon_gobuster
+            else
+                if [ "$gobuster_mode" != "dns" ]; then
+                    payload="gobuster $gobuster_mode -u $gobuster_url -w $gobuster_wordlist"
+                else
+                    payload="gobuster $gobuster_mode -d $gobuster_domain -w $gobuster_wordlist"
+                fi
+                if [ "$gobuster_mode" == "dir" ]; then
+                    if [ "$gobuster_fileext" != "" ]; then     payload="$payload $gobuster_fileext"; fi
+                    if [ "$gobuster_statcode" != "" ]; then    payload="$payload $gobuster_statcode"; fi
+                elif [ "$gobuster_mode" == "dns" ]; then
+                    if [ "$gobuster_resolver" != "" ]; then     payload="$payload $gobuster_resolver"; fi
+                fi
+                if [ "$gobuster_cookies" != "" ]; then     payload="$payload $gobuster_cookies"; fi
+                if [ "$gobuster_headers" != "" ]; then     payload="$payload $gobuster_headers"; fi
+                if [ "$gobuster_notls" != "" ]; then     payload="$payload $gobuster_notls"; fi
+                if [ "$gobuster_username" != "" ]; then     payload="$payload $gobuster_username"; fi
+                if [ "$gobuster_password" != "" ]; then     payload="$payload $gobuster_password"; fi
+                if [ "$gobuster_verbose" != "" ]; then     payload="$payload $gobuster_verbose"; fi
+                if [ "$gobuster_useragent" != "" ]; then   payload="$payload $gobuster_useragent"; fi
+                if [ "$gobuster_threads" != "" ]; then    payload="$payload $gobuster_threads"; fi
+                if [ "$gobuster_output" != "" ]; then      payload="$payload $gobuster_output"; fi
+                echo -ne $payload | xclip -sel clip
+                rf_msg "$(pfx -n "INFO") $1 GoBuster command copied to the clipboard."
+                exit 0
+            fi
+            ;;
+        "BACK")
+            menu_recon
+            ;;
+    esac
+}
+
+
+gobuster_wordlist()
+{
+    if [ "$curr_dir" == "" ]; then
+        curr_dir="$wordlists_dir"
+    fi
+    folders=$(echo -e "$(pfx -n "BACK") $curr_dir\n$lbrk"; ls -1 $curr_dir)
+	result=$(echo -ne "$folders" | rf "WORDLIST")
+    result=$(echo $result | awk '{print $1}')
+	case $result in
+        "BACK")
+            curr_dir=$(dirname $curr_dir)
+            gobuster_wordlist
+            ;;
+        "$lbrk")
+            gobuster_wordlist
+            ;;
+        *)
+            if [ "$result" != "" ]; then
+                if [ "$curr_dir" == "/" ]; then
+                    curr_dir="/$result"
+                else
+                    curr_dir="$curr_dir/$result"
+                fi
+                if [ -d "$curr_dir" ]; then
+                    gobuster_wordlist
+                else
+                    gobuster_wordlist="$curr_dir"
+                    rf_msg "$(pfx -n "INFO") GoBuster wordlist set to '$gobuster_wordlist'."
+                    curr_dir=""
+                    recon_gobuster
+                fi
+            else
+                recon_gobuster
+            fi
+            ;;
+    esac
 }
 
 recon_ferox()
